@@ -1,0 +1,39 @@
+---
+name: support-triage
+object_config:
+  model_name: openai/gpt-4o-mini
+  schema:
+    type: object
+    additionalProperties: false
+    properties:
+      category:
+        type: string
+      priority:
+        type: string
+    required:
+      - category
+      - priority
+test_settings:
+  dataset: support-triage-data.jsonl
+  evals:
+    - valid_category
+  props:
+    ticket: "I was charged twice for my Pro plan this month. Please refund the duplicate charge."
+input_schema:
+  type: object
+  properties:
+    ticket:
+      type: string
+      description: "The customer's support ticket text"
+  required:
+    - ticket
+---
+
+<System>
+You are a support ticket router. Read the customer's ticket and classify it into a
+category and a priority.
+</System>
+
+<User>
+{props.ticket}
+</User>

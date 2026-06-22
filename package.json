@@ -1,0 +1,21 @@
+{
+  "name": "support-triage-demo",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "AgentMark launch-week Day 1 demo: prod failure -> fix -> eval -> PR from a coding agent",
+  "devDependencies": {
+    "@agentmark-ai/cli": "^0.27.1"
+  },
+  "scripts": {
+    "dev": "agentmark dev",
+    "agentmark:build": "agentmark build",
+    "agentmark:experiment": "agentmark run-experiment"
+  },
+  "dependencies": {
+    "@agentmark-ai/prompt-core": "^1.2.0",
+    "@agentmark-ai/sdk": "^2.1.2",
+    "dotenv": "^17.4.2",
+    "openai": "^6.44.0"
+  }
+}

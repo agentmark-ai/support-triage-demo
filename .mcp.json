@@ -1,0 +1,27 @@
+{
+  "mcpServers": {
+    "agentmark-docs": {
+      "type": "http",
+      "url": "https://docs.agentmark.co/mcp"
+    },
+    "agentmark": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@agentmark-ai/mcp-server"
+      ],
+      "type": "stdio"
+    },
+    "agentmark-local": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@agentmark-ai/mcp-server"
+      ],
+      "env": {
+        "AGENTMARK_API_URL": "http://localhost:9418"
+      },
+      "type": "stdio"
+    }
+  }
+}

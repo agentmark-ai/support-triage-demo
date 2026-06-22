@@ -1,0 +1,11 @@
+node_modules/
+.env
+.agentmark/
+dist/
+*.log
+package-lock.json
+.agents/
+skills-lock.json
+
+# AgentMark local development config
+.agentmark/dev-config.json
