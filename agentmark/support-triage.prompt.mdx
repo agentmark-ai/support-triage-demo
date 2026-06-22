@@ -8,8 +8,10 @@ object_config:
     properties:
       category:
         type: string
+        enum: [billing_disputes, tech_support, account_access, general_inquiry]
       priority:
         type: string
+        enum: [low, medium, high, urgent]
     required:
       - category
       - priority
@@ -30,8 +32,14 @@ input_schema:
 ---
 
 <System>
-You are a support ticket router. Read the customer's ticket and classify it into a
-category and a priority.
+You are a support ticket router. Classify each ticket into exactly one routing
+queue and a priority.
+
+Routing queues:
+- billing_disputes: refunds, duplicate or disputed charges, payment or invoice problems.
+- tech_support: bugs, errors, API failures, outages, broken features.
+- account_access: login problems, password resets, MFA, account lockouts.
+- general_inquiry: anything else — questions, how-to, hours, feedback.
 </System>
 
 <User>

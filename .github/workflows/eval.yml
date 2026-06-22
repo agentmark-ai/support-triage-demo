@@ -1,0 +1,56 @@
+name: eval
+
+# Gate every PR that touches the prompt, dataset, or client on the AgentMark eval.
+# This is the "prove the fix" beat running in CI: run-experiment exits non-zero
+# when the pass rate drops below the threshold, so a regression blocks the merge.
+on:
+  pull_request:
+    paths:
+      - "agentmark/**"
+      - "agentmark.json"
+      - "agentmark.client.ts"
+      - "dev-entry.ts"
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install
+
+      - name: Start AgentMark dev server (API + webhook)
+        run: npx agentmark dev --no-ui &
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+      - name: Wait for the dev server (API + webhook) to come up
+        run: |
+          # `agentmark dev` runs THREE servers — API (:9418), Webhook (:9417),
+          # App (:3000). `run-experiment` dispatches to the WEBHOOK (:9417), so
+          # gate on it too: waiting only for the API races the webhook startup
+          # and run-experiment fails with "Could not connect to :9417".
+          for i in $(seq 1 90); do
+            if curl -fsS http://localhost:9418/v1/openapi.json >/dev/null 2>&1 \
+               && curl -s -o /dev/null http://localhost:9417/; then
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "dev server (api :9418 / webhook :9417) never became ready" && exit 1
+
+      - name: Run eval gate (100% must pass)
+        run: >
+          npx agentmark run-experiment agentmark/support-triage.prompt.mdx
+          --threshold 100 --format junit > eval-results.xml
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+      - name: Publish eval results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-results
+          path: eval-results.xml
