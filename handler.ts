@@ -4,6 +4,7 @@ import { createExecutor } from "@agentmark-ai/prompt-core";
 import type { WebhookRequest } from "@agentmark-ai/prompt-core/webhook-runner";
 import { client } from "./agentmark.client";
 import OpenAI from "openai";
+import { flagUnroutableCategory } from "./routing-guard";
 
 let _openai: OpenAI | null = null;
 const openai = () => (_openai ??= new OpenAI());
@@ -30,7 +31,7 @@ const executor = createExecutor({
       },
     };
   },
-  object: async (formatted) => {
+  object: async (formatted, ctx) => {
     const res = await openai().chat.completions.create({
       model: formatted.object_config.model_name.replace(/^openai\//, ""),
       messages: formatted.messages,
@@ -43,8 +44,12 @@ const executor = createExecutor({
         },
       },
     });
+    const object = JSON.parse(res.choices[0].message.content ?? "{}");
+    // Explain an unroutable category on the span (routing_error) so the prod
+    // trace says why the output fails, next to the misroute it recorded.
+    flagUnroutableCategory((object as { category?: unknown }).category, ctx.span);
     return {
-      object: JSON.parse(res.choices[0].message.content ?? "{}"),
+      object,
       usage: {
         inputTokens: res.usage?.prompt_tokens ?? 0,
         outputTokens: res.usage?.completion_tokens ?? 0,

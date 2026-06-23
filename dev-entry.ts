@@ -3,6 +3,7 @@ import { createWebhookServer } from "@agentmark-ai/cli/runner-server";
 import { createExecutor } from "@agentmark-ai/prompt-core";
 import { AgentMarkSDK, createWebhookRunner } from "@agentmark-ai/sdk";
 import OpenAI from "openai";
+import { flagUnroutableCategory } from "./routing-guard";
 
 // Lazy: the dev server boots without a key (so the API + webhook come up for
 // trace inspection / dataset import); only an actual LLM call constructs the
@@ -34,7 +35,7 @@ async function main() {
         },
       };
     },
-    object: async (formatted) => {
+    object: async (formatted, ctx) => {
       const res = await openai().chat.completions.create({
         model: formatted.object_config.model_name.replace(/^openai\//, ""),
         messages: formatted.messages,
@@ -47,8 +48,12 @@ async function main() {
           },
         },
       });
+      const object = JSON.parse(res.choices[0].message.content ?? "{}");
+      // Explain an unroutable category on the span (routing_error) so the prod
+      // trace says why the output fails, next to the misroute it recorded.
+      flagUnroutableCategory((object as { category?: unknown }).category, ctx.span);
       return {
-        object: JSON.parse(res.choices[0].message.content ?? "{}"),
+        object,
         usage: {
           inputTokens: res.usage?.prompt_tokens ?? 0,
           outputTokens: res.usage?.completion_tokens ?? 0,
