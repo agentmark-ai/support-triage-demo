@@ -3,8 +3,10 @@
 Launch-week Day 1 demo for AgentMark: **fix a failing agent without leaving your editor.**
 
 A support-ticket router (`agentmark/support-triage.prompt.mdx`) classifies tickets into
-routing queues. In production it emits free-text categories like `"Billing Issue"` that the
-downstream router doesn't accept — so a refund ticket gets misrouted.
+routing queues. In production it emits free-text categories like `"Billing Issue"` that aren't
+one of the router's queues — so the router rejects the ticket and the live run fails with a
+**red error trace** (the executor throws on a streaming run; batch eval rows stay scorable so
+the `valid_category` scorer still gates CI).
 
 The whole loop runs from a coding agent (Claude Code / Cursor) via the AgentMark local MCP + CLI:
 
