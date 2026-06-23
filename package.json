@@ -14,7 +14,7 @@
     "@agentmark-ai/sdk": "2.1.4",
     "dotenv": "^17.4.2",
     "openai": "^6.44.0",
-    "@agentmark-ai/cli": "0.27.5",
+    "@agentmark-ai/cli": "0.27.6",
     "@agentmark-ai/mcp-server": "0.4.2"
   }
 }
