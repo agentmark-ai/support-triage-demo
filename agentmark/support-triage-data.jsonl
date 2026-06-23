@@ -1,3 +1,4 @@
 {"input": {"ticket": "The API returns a 500 error every time I call /v1/export since this morning."}, "expected_output": "{\"category\": \"tech_support\", \"priority\": \"high\"}"}
 {"input": {"ticket": "I can't log in. The password reset email never arrives and I'm locked out of my account."}, "expected_output": "{\"category\": \"account_access\", \"priority\": \"high\"}"}
 {"input": {"ticket": "What are your business hours, and which channels can I reach support on?"}, "expected_output": "{\"category\": \"general_inquiry\", \"priority\": \"low\"}"}
+{"input": {"ticket": "I was charged twice for my Pro plan this month. Please refund the duplicate charge."}, "expected_output": "{\"category\": \"billing_disputes\", \"priority\": \"high\"}"}
