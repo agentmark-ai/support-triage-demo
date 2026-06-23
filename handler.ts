@@ -45,9 +45,16 @@ const executor = createExecutor({
       },
     });
     const object = JSON.parse(res.choices[0].message.content ?? "{}");
-    // Explain an unroutable category on the span (routing_error) so the prod
-    // trace says why the output fails, next to the misroute it recorded.
-    flagUnroutableCategory((object as { category?: unknown }).category, ctx.span);
+    // Record the model's output FIRST so the trace shows what it produced even
+    // when the next line rejects it — otherwise the throw loses the response.
+    ctx.span.setAttribute("agentmark.output", JSON.stringify(object));
+    // Reject an unroutable category. Throw only on a live (streaming) run so the
+    // prod trace goes red; batch experiment rows (non-streaming) stay scorable.
+    flagUnroutableCategory(
+      (object as { category?: unknown }).category,
+      ctx.span,
+      ctx.shouldStream,
+    );
     return {
       object,
       usage: {
